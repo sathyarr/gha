@@ -1,0 +1,7 @@
+{
+  "name": "gha",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "react"
+}
