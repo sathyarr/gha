@@ -15,7 +15,9 @@ import { IonApp,
     IonButtons,
     IonButton,
     IonItem, 
-    IonSplitPane} from '@ionic/react';
+    IonSplitPane,
+    IonCard,
+    IonCardContent} from '@ionic/react';
 
 import SplitPane from 'react-split-pane';
   
@@ -121,6 +123,21 @@ const Model: React.FC = () => {
                         onSceneMount={onMainSceneMount}/>
             }
         </div>
+        <IonContent>
+            <IonList>
+            <IonListHeader><IonLabel>Bodypart</IonLabel></IonListHeader>
+            <IonItem>
+                <IonButton style={{ width: '100%' }} onClick={()=>{ console.log("hello")}}>
+                        <IonLabel>Hand</IonLabel>
+                </IonButton>
+            </IonItem>
+            <IonItem>
+            <IonButton style={{ width: '100%' }} onClick={()=>{ console.log("world")}}>
+                        <IonLabel>Leg</IonLabel>
+                </IonButton>
+            </IonItem>
+            </IonList>
+        </IonContent>
         </SplitPane>
         </IonContent>
         {/* <IonContent style={{ width:'100%', height: '100%'}} fullscreen>
