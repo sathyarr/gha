@@ -76,14 +76,10 @@ export type SceneEventArgs = {
   
     
     if (width !== undefined && height !== undefined) {
-        opts.width = width;
-        opts.height = height;
-    }
-    else {
-        opts.width =  "500%";
-        opts.height = "500%";
-    }
-    
+      opts.width = width;
+      opts.height = height;
+      }
+      
       return (
         <canvas
           {...opts}
