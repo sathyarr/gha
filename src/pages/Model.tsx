@@ -26,6 +26,7 @@ import BabylonScene from '../components/SceneComponent';
 
 import * as BABYLON from 'babylonjs'
 import * as GUI from 'babylonjs-gui'
+import * as $ from 'jquery'
 import 'babylonjs-loaders'
 import { useEffect, useRef, useState } from 'react';
 
@@ -74,105 +75,118 @@ const Model: React.FC = () => {
             // m.scaling = new BABYLON.Vector3(0.25, 2.25, 0.25);
     
             model.rotation = new BABYLON.Vector3(-0, Math.PI / 4, 0);
-    
+
             var advancedTexture = GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
 
-            var hl = new BABYLON.HighlightLayer("hl1", scene);
-            var systemhl = new BABYLON.HighlightLayer("hl1", scene);
+            var bodypartToMeshMapping = JSON.parse('{ \
+              "Head": ["node12", "node8"], \
+              "Thigh": ["node14"], \
+              "Hand": ["node18"], \
+              "Spine": ["node6"] \
+            }')
 
-            function highlight(target: string, color: BABYLON.Color3) {
-              hl.removeAllMeshes();
-              systemhl.removeAllMeshes();
-              let targetMesh = scene.getMeshByName(target);
-              hl.addMesh(targetMesh, color);
-            }
-
-            function highlightAdd(target: string, color: BABYLON.Color3) {
-              let targetMesh = scene.getMeshByName(target);
-              hl.addMesh(targetMesh, color);
-            }
-
-            function createButton(targetMesh: string, text: string, width: string, height: string, color: string, cornerRadius: number, background: string, alignment: number) {
-              console.log(targetMesh, text, width, height, color, cornerRadius, background, alignment)
+            var systemToBodyPartMapping = JSON.parse('{ \
+              "Physical Exam": [ \
+                { \
+                  "bodyParts": ["Head", "Hand"], \
+                  "neutrality": "positive" \
+                }, \
+                { \
+                  "bodyParts": ["Thigh", "Spine"], \
+                  "neutrality": "negative" \
+                } \
+              ], \
+              "Chief Complaint": [ \
+                { \
+                  "bodyParts": ["Head"], \
+                  "neutrality": "positive" \
+                }, \
+                { \
+                  "bodyParts": ["Thigh", "Hand", "Spine"], \
+                  "neutrality": "negative" \
+                } \
+              ] \
+            }')
     
-              var button1 = GUI.Button.CreateSimpleButton(targetMesh + "btn", text);
-              button1.width = width
-              button1.height = height;
-              button1.color = color;
-              button1.cornerRadius = cornerRadius;
-              button1.background = background;
-              button1.horizontalAlignment = alignment;
-
-              return button1
+            function createButton(name: string[], text: string, width: string, height: string, color: string, cornerRadius: number, background: string, alignment: number) {
+              console.log(name.join(), text, width, height, color, cornerRadius, background, alignment)
+    
+              var button = GUI.Button.CreateSimpleButton(name.join() + "btn", text);
+              button.width = width
+              button.height = height;
+              button.color = color;
+              button.cornerRadius = cornerRadius;
+              button.background = background;
+              button.horizontalAlignment = alignment;
+    
+              return button
+            }
+    
+            var bodypartHL = new BABYLON.HighlightLayer("bodypartHL", scene);
+    
+            function highlight(target: string, color: BABYLON.Color3) {
+              let targetMesh = scene.getMeshByName(target);
+              bodypartHL.addMesh(targetMesh, color);
             }
 
-            function updateBodyPartHighlight(button: GUI.Button, targetMesh: string) {
-              button.onPointerUpObservable.add(function() {
-                // let m = scene.getNodeByName(targetMesh)
-                // m.position.x = 2;
-                highlight(targetMesh, BABYLON.Color3.Yellow())
-              });
+            function highlightHelper(target: any, color: BABYLON.Color3) {
+              $.each(target, function(index, val) {
+                highlight(val, color);
+              })
             }
 
+            function setBodyPartHighlight(bodyPart: string) {
+              bodypartHL.removeAllMeshes();
+              highlightHelper(bodypartToMeshMapping[bodyPart], BABYLON.Color3.Green());
+            }
+    
             function createBodyPartPanel() {
               var bodyPartPanel = new GUI.StackPanel();
               advancedTexture.addControl(bodyPartPanel);
 
-              var node12Btn = createButton("node12", "Head", "150px", "40px", "white", 20, "green", GUI.Control.HORIZONTAL_ALIGNMENT_LEFT)
-              var node14Btn = createButton("node14", "Femur", "150px", "40px", "white", 20, "green", GUI.Control.HORIZONTAL_ALIGNMENT_LEFT)
-              var node18Btn = createButton("node18", "Finger", "150px", "40px", "white", 20, "green", GUI.Control.HORIZONTAL_ALIGNMENT_LEFT)
-              var node6Btn = createButton("node6", "Vertebrae", "150px", "40px", "white", 20, "green", GUI.Control.HORIZONTAL_ALIGNMENT_LEFT)
-
-              bodyPartPanel.addControl(node12Btn);
-              bodyPartPanel.addControl(node14Btn);
-              bodyPartPanel.addControl(node18Btn);
-              bodyPartPanel.addControl(node6Btn);
-
-              updateBodyPartHighlight(node12Btn, "node12")
-              updateBodyPartHighlight(node14Btn, "node14")
-              updateBodyPartHighlight(node18Btn, "node18")
-              updateBodyPartHighlight(node6Btn, "node6")
+              $.each(bodypartToMeshMapping, function(key: string, val){
+                  var button = createButton(val, key, "150px", "40px", "white", 20, "green", GUI.Control.HORIZONTAL_ALIGNMENT_LEFT)
+                  bodyPartPanel.addControl(button);
+                  button.onPointerUpObservable.add(function() {
+                    setBodyPartHighlight(key);
+                  });
+              });
             }
             createBodyPartPanel();
+    
 
-            function updateSystemHighlightPE(button: GUI.Button) {
-              button.onPointerUpObservable.add(function() {
-                // let m = scene.getNodeByName(targetMesh)
-                // m.position.x = 2;
-                highlight("node12", BABYLON.Color3.Red());
-                highlightAdd("node14", BABYLON.Color3.Green());
-                highlightAdd("node18", BABYLON.Color3.Red());
-                highlightAdd("node6", BABYLON.Color3.Green());
+            function setSystemHighlight(targets: any) {
+              bodypartHL.removeAllMeshes();
+
+              var neutralityToColorMapping = new Map()
+              neutralityToColorMapping.set("positive", BABYLON.Color3.Green())
+              neutralityToColorMapping.set("negative", BABYLON.Color3.Red())
+
+              $.each(targets, function(index, val){
+                // Transform bodypart name to meshname, neutrality key to color
+                var neutralityValue = val['neutrality']
+                var meshItems = $.map(val['bodyParts'], function(i) {
+                  return bodypartToMeshMapping[i];
+                });
+                highlightHelper(meshItems, neutralityToColorMapping.get(neutralityValue));
               });
             }
-
-            function updateSystemHighlightCC(button: GUI.Button) {
-              button.onPointerUpObservable.add(function() {
-                // let m = scene.getNodeByName(targetMesh)
-                // m.position.x = 2;
-                highlight("node12", BABYLON.Color3.Red());
-                highlightAdd("node14", BABYLON.Color3.Red());
-                highlightAdd("node18", BABYLON.Color3.Red());
-                highlightAdd("node6", BABYLON.Color3.Green());
-              });
-            }
-
+    
             function createSystemPanel() {
               var panel = new GUI.StackPanel();
               advancedTexture.addControl(panel);
               panel.verticalAlignment = 1;
 
-              // panel.addControl(createButton)
-              var peBtn = createButton("PhysicalExam", "Physical Exam", "150px", "40px", "white", 20, "green", GUI.Control.HORIZONTAL_ALIGNMENT_LEFT)
-              var ccBtn = createButton("ChiefComplaints", "Chief Complaints", "150px", "40px", "white", 20, "green", GUI.Control.HORIZONTAL_ALIGNMENT_LEFT)
-
-              panel.addControl(peBtn);
-              panel.addControl(ccBtn);
-
-              updateSystemHighlightPE(peBtn);
-              updateSystemHighlightCC(ccBtn);
+              $.each(systemToBodyPartMapping, function(key: string, val){
+                var button = createButton([key], key, "150px", "40px", "white", 20, "green", GUI.Control.HORIZONTAL_ALIGNMENT_LEFT)
+                panel.addControl(button);
+                button.onPointerUpObservable.add(function() {
+                  setSystemHighlight(val);
+                });
+              });
             }
             createSystemPanel();
+
 
             scene.createDefaultEnvironment({
             createSkybox: false,
@@ -180,6 +194,9 @@ const Model: React.FC = () => {
             });
             scene.createDefaultCameraOrLight(true, true, true);
         });
+
+        // BABYLON.SceneLoader.ImportMesh("","assets/models/muscular", "scene.gltf", scene, function(meshes) {
+        // });
 
         engine.runRenderLoop(async function() {
             if (scene) {
