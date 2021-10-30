@@ -16,14 +16,16 @@ import { IonApp,
   IonButton,
   IonItem } from '@ionic/react';
 
-import { moon,menu,home, newspaper } from "ionicons/icons";
+import { moon,menu,home, newspaper, body } from "ionicons/icons";
 
 import './Home.css';
 
 const Home: React.FC = () => {
+
   const toggleDarkModeHandler = () => {
     document.body.classList.toggle("dark");
   };
+
   return (
     <>
     <IonMenu content-id="main-content">
@@ -49,6 +51,12 @@ const Home: React.FC = () => {
           <IonIcon slot="start" icon={newspaper} className="component-icon component-icon-dark"/>
           <IonLabel>
             Chart
+          </IonLabel>
+        </IonItem>
+        <IonItem button routerLink="/model">
+          <IonIcon slot="start" icon={body} className="component-icon component-icon-dark"/>
+          <IonLabel>
+            Visualize
           </IonLabel>
         </IonItem>
       </IonMenuToggle>
