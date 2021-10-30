@@ -68,6 +68,112 @@ const Model: React.FC = () => {
             let model = scene.getMeshByName("__root__");
     
             model.rotate(BABYLON.Axis.Y, Math.PI / 2, BABYLON.Space.WORLD);
+
+            console.log(scene.meshes)
+            // let m = scene.getNodeByName("node12")
+            // m.scaling = new BABYLON.Vector3(0.25, 2.25, 0.25);
+    
+            model.rotation = new BABYLON.Vector3(-0, Math.PI / 4, 0);
+    
+            var advancedTexture = GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
+
+            var hl = new BABYLON.HighlightLayer("hl1", scene);
+            var systemhl = new BABYLON.HighlightLayer("hl1", scene);
+
+            function highlight(target: string, color: BABYLON.Color3) {
+              hl.removeAllMeshes();
+              systemhl.removeAllMeshes();
+              let targetMesh = scene.getMeshByName(target);
+              hl.addMesh(targetMesh, color);
+            }
+
+            function highlightAdd(target: string, color: BABYLON.Color3) {
+              let targetMesh = scene.getMeshByName(target);
+              hl.addMesh(targetMesh, color);
+            }
+
+            function createButton(targetMesh: string, text: string, width: string, height: string, color: string, cornerRadius: number, background: string, alignment: number) {
+              console.log(targetMesh, text, width, height, color, cornerRadius, background, alignment)
+    
+              var button1 = GUI.Button.CreateSimpleButton(targetMesh + "btn", text);
+              button1.width = width
+              button1.height = height;
+              button1.color = color;
+              button1.cornerRadius = cornerRadius;
+              button1.background = background;
+              button1.horizontalAlignment = alignment;
+
+              return button1
+            }
+
+            function updateBodyPartHighlight(button: GUI.Button, targetMesh: string) {
+              button.onPointerUpObservable.add(function() {
+                // let m = scene.getNodeByName(targetMesh)
+                // m.position.x = 2;
+                highlight(targetMesh, BABYLON.Color3.Yellow())
+              });
+            }
+
+            function createBodyPartPanel() {
+              var bodyPartPanel = new GUI.StackPanel();
+              advancedTexture.addControl(bodyPartPanel);
+
+              var node12Btn = createButton("node12", "Head", "150px", "40px", "white", 20, "green", GUI.Control.HORIZONTAL_ALIGNMENT_LEFT)
+              var node14Btn = createButton("node14", "Femur", "150px", "40px", "white", 20, "green", GUI.Control.HORIZONTAL_ALIGNMENT_LEFT)
+              var node18Btn = createButton("node18", "Finger", "150px", "40px", "white", 20, "green", GUI.Control.HORIZONTAL_ALIGNMENT_LEFT)
+              var node6Btn = createButton("node6", "Vertebrae", "150px", "40px", "white", 20, "green", GUI.Control.HORIZONTAL_ALIGNMENT_LEFT)
+
+              bodyPartPanel.addControl(node12Btn);
+              bodyPartPanel.addControl(node14Btn);
+              bodyPartPanel.addControl(node18Btn);
+              bodyPartPanel.addControl(node6Btn);
+
+              updateBodyPartHighlight(node12Btn, "node12")
+              updateBodyPartHighlight(node14Btn, "node14")
+              updateBodyPartHighlight(node18Btn, "node18")
+              updateBodyPartHighlight(node6Btn, "node6")
+            }
+            createBodyPartPanel();
+
+            function updateSystemHighlightPE(button: GUI.Button) {
+              button.onPointerUpObservable.add(function() {
+                // let m = scene.getNodeByName(targetMesh)
+                // m.position.x = 2;
+                highlight("node12", BABYLON.Color3.Red());
+                highlightAdd("node14", BABYLON.Color3.Green());
+                highlightAdd("node18", BABYLON.Color3.Red());
+                highlightAdd("node6", BABYLON.Color3.Green());
+              });
+            }
+
+            function updateSystemHighlightCC(button: GUI.Button) {
+              button.onPointerUpObservable.add(function() {
+                // let m = scene.getNodeByName(targetMesh)
+                // m.position.x = 2;
+                highlight("node12", BABYLON.Color3.Red());
+                highlightAdd("node14", BABYLON.Color3.Red());
+                highlightAdd("node18", BABYLON.Color3.Red());
+                highlightAdd("node6", BABYLON.Color3.Green());
+              });
+            }
+
+            function createSystemPanel() {
+              var panel = new GUI.StackPanel();
+              advancedTexture.addControl(panel);
+              panel.verticalAlignment = 1;
+
+              // panel.addControl(createButton)
+              var peBtn = createButton("PhysicalExam", "Physical Exam", "150px", "40px", "white", 20, "green", GUI.Control.HORIZONTAL_ALIGNMENT_LEFT)
+              var ccBtn = createButton("ChiefComplaints", "Chief Complaints", "150px", "40px", "white", 20, "green", GUI.Control.HORIZONTAL_ALIGNMENT_LEFT)
+
+              panel.addControl(peBtn);
+              panel.addControl(ccBtn);
+
+              updateSystemHighlightPE(peBtn);
+              updateSystemHighlightCC(ccBtn);
+            }
+            createSystemPanel();
+
             scene.createDefaultEnvironment({
             createSkybox: false,
             createGround: false
