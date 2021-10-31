@@ -101,6 +101,24 @@ function animateCamera (scene: any, position: any) {
     scene.beginAnimation(scene.activeCamera, 0, 100, true)
   }
 
+  function createLabel (mesh: any, advancedTexture: any, text: any) {
+    var label = new GUI.Rectangle('label for ' + mesh.name)
+    label.background = 'black'
+    label.height = '30px'
+    label.alpha = 0.5
+    label.width = '100px'
+    label.cornerRadius = 20
+    label.thickness = 1
+    label.linkOffsetY = 30
+    advancedTexture.addControl(label)
+    label.linkWithMesh(mesh)
+
+    var text1 = new GUI.TextBlock()
+    text1.text = text
+    text1.color = 'white'
+    label.addControl(text1)
+  }
+
 let hl: any = null
 const render = true
 let rerender = true
@@ -111,14 +129,14 @@ let procedureContainer: any = null
 
 let uniqueKey = 0
 
-interface stateType {
-    data: string
- }
 
 const Model: React.FC = () => {
 
-  let location = useLocation<stateType>()
-//   console.log(location.state.data) 
+  let location = useLocation()
+  var responseData = JSON.stringify(location.state)
+  console.log("Response Data:")
+  console.log(responseData)
+  
   const [modalContentDimensions, setModalContentDimensions] = useState({ width:600, height:400})
   const modelPaneRef = useRef<any>(null)
   const [reactRender, setReactRender] = useState(false)
@@ -179,7 +197,7 @@ const Model: React.FC = () => {
         //     setShowLoading(false)
         // })
 
-        BABYLON.SceneLoader.ImportMesh("","assets/muscular/", "scene.gltf", scene, function(meshes) {
+        BABYLON.SceneLoader.ImportMesh("","assets/skeleton/", "scene.gltf", scene, function(meshes) {
             let model = scene.getMeshByName("__root__");
     
             model.rotate(BABYLON.Axis.Y, Math.PI / 2, BABYLON.Space.WORLD);
@@ -190,36 +208,72 @@ const Model: React.FC = () => {
              */
              var advancedTexture = GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
 
-            //  var bodypartToMeshMapping = JSON.parse(location.state.data)
-             var bodypartToMeshMapping = JSON.parse('{ \
-                "Head": ["node12", "node8"], \
-                "Thigh": ["node14"], \
-                "Hand": ["node18"], \
-                "Spine": ["node6"] \
-              }')
- 
-             var systemToBodyPartMapping = JSON.parse('{ \
-               "Physical Exam": [ \
-                 { \
-                   "bodyParts": ["Head", "Hand"], \
-                   "neutrality": "positive" \
-                 }, \
-                 { \
-                   "bodyParts": ["Thigh", "Spine"], \
-                   "neutrality": "negative" \
-                 } \
-               ], \
-               "Chief Complaint": [ \
-                 { \
-                   "bodyParts": ["Head"], \
-                   "neutrality": "positive" \
-                 }, \
-                 { \
-                   "bodyParts": ["Thigh", "Hand", "Spine"], \
-                   "neutrality": "negative" \
-                 } \
-               ] \
-             }')
+             var lowLevelDetailRect = new GUI.Rectangle();
+             lowLevelDetailRect.width = 0.2;
+             lowLevelDetailRect.height = "100px";
+             lowLevelDetailRect.cornerRadius = 20;
+             lowLevelDetailRect.color = "Orange";
+             lowLevelDetailRect.thickness = 4;
+             lowLevelDetailRect.background = "green";
+             lowLevelDetailRect.horizontalAlignment = GUI.Control.HORIZONTAL_ALIGNMENT_RIGHT;
+             lowLevelDetailRect.verticalAlignment = GUI.Control.VERTICAL_ALIGNMENT_BOTTOM;
+            //  lowLevelDetailRect.adaptHeightToChildren = true;
+            //  lowLevelDetailRect.adaptWidthToChildren = true;
+            lowLevelDetailRect.paddingRight = 20
+            lowLevelDetailRect.paddingBottom = 20
+             advancedTexture.addControl(lowLevelDetailRect);  
+
+             var lowDetailsTB = new GUI.TextBlock();
+             lowDetailsTB.text = "Info Box";
+             lowDetailsTB.color = "white";
+             lowDetailsTB.fontSize = 15;
+             lowDetailsTB.outlineWidth = 0;
+             lowDetailsTB.textHorizontalAlignment = GUI.Control.HORIZONTAL_ALIGNMENT_CENTER
+             lowDetailsTB.horizontalAlignment = GUI.Control.HORIZONTAL_ALIGNMENT_RIGHT
+             lowLevelDetailRect.addControl(lowDetailsTB);
+             
+             var highLevelDetailRect = new GUI.Rectangle();
+             highLevelDetailRect.width = 0.2;
+             highLevelDetailRect.height = "150px";
+             highLevelDetailRect.cornerRadius = 20;
+             highLevelDetailRect.color = "Orange";
+             highLevelDetailRect.thickness = 4;
+             highLevelDetailRect.background = "green";
+             highLevelDetailRect.horizontalAlignment = GUI.Control.HORIZONTAL_ALIGNMENT_RIGHT;
+             highLevelDetailRect.verticalAlignment = GUI.Control.VERTICAL_ALIGNMENT_BOTTOM;
+            //  highLevelDetailRect.adaptHeightToChildren = true;
+            //  highLevelDetailRect.adaptWidthToChildren = true;
+            highLevelDetailRect.paddingRight = 20
+            highLevelDetailRect.paddingBottom = 20
+             advancedTexture.addControl(highLevelDetailRect); 
+
+             var highDetailsTB = new GUI.TextBlock();
+             highDetailsTB.text = "Info Box";
+             highDetailsTB.color = "white";
+             highDetailsTB.fontSize = 15;
+             highDetailsTB.outlineWidth = 0;
+             highDetailsTB.textHorizontalAlignment = GUI.Control.HORIZONTAL_ALIGNMENT_CENTER
+             highDetailsTB.horizontalAlignment = GUI.Control.HORIZONTAL_ALIGNMENT_RIGHT
+             highLevelDetailRect.addControl(highDetailsTB);
+
+            //  var responseData = JSON.stringify(location.state)
+            //  console.log("Response Data:")
+            //  console.log(responseData)
+
+            var serverResponse = JSON.parse(responseData)
+            console.log("serverResponse Data:")
+            console.log(serverResponse)
+
+
+             var bodypartToMeshMapping = serverResponse['topkbpmmapping']
+             var allBodypartToMeshMapping = serverResponse['allbpmmapping']
+             var systemToBodyPartMapping = serverResponse['system-data']
+             var lowDetailsData = serverResponse['low-data']
+             var highDetailsData = serverResponse['high-data']
+
+             console.log(bodypartToMeshMapping)
+             console.log(allBodypartToMeshMapping)
+             console.log(systemToBodyPartMapping)
      
              function createButton(name: string[], text: string, width: string, height: string, color: string, cornerRadius: number, background: string, alignment: number) {
                console.log(name.join(), text, width, height, color, cornerRadius, background, alignment)
@@ -230,6 +284,8 @@ const Model: React.FC = () => {
                button.color = color;
                button.cornerRadius = cornerRadius;
                button.background = background;
+               button.paddingBottom = 3;
+               button.fontSize = 15;
                button.horizontalAlignment = alignment;
      
                return button
@@ -254,15 +310,22 @@ const Model: React.FC = () => {
  
              function setBodyPartHighlight(bodyPart: string) {
                bodypartHL.removeAllMeshes();
-               highlightHelper(bodypartToMeshMapping[bodyPart], BABYLON.Color3.Green());
+               highlightHelper(bodypartToMeshMapping[bodyPart], BABYLON.Color3.Yellow());
+
+               console.log(lowDetailsData)
+               console.log(lowDetailsData[bodyPart])
+               highLevelDetailRect.isVisible = false;
+               lowLevelDetailRect.isVisible = true;
+               lowDetailsTB.text = 'Confidence Score:\n' + lowDetailsData[bodyPart]
              }
      
              function createBodyPartPanel() {
                var bodyPartPanel = new GUI.StackPanel();
+               bodyPartPanel.paddingLeft = 20;
                advancedTexture.addControl(bodyPartPanel);
  
                $.each(bodypartToMeshMapping, function(key: string, val){
-                   var button = createButton(val, key, "150px", "40px", "white", 20, "green", GUI.Control.HORIZONTAL_ALIGNMENT_LEFT)
+                   var button = createButton(val, key, "150px", "40px", "white", 10, "green", GUI.Control.HORIZONTAL_ALIGNMENT_LEFT)
                    bodyPartPanel.addControl(button);
                    button.onPointerUpObservable.add(function() {
                      setBodyPartHighlight(key);
@@ -280,24 +343,36 @@ const Model: React.FC = () => {
                var neutralityToColorMapping = new Map()
                neutralityToColorMapping.set("positive", BABYLON.Color3.Green())
                neutralityToColorMapping.set("negative", BABYLON.Color3.Red())
- 
+
+               var hData = "";
+
                $.each(targets, function(index, val){
                  // Transform bodypart name to meshname, neutrality key to color
                  var neutralityValue = val['neutrality']
                  var meshItems = $.map(val['bodyParts'], function(i) {
-                   return bodypartToMeshMapping[i];
+                   if(highDetailsData[i] != "") {
+                     hData += i + " " + highDetailsData[i] + "\n"
+                   }
+                   return allBodypartToMeshMapping[i];
                  });
                  highlightHelper(meshItems, neutralityToColorMapping.get(neutralityValue));
                });
+
+               lowLevelDetailRect.isVisible = false;
+               highLevelDetailRect.isVisible = true;
+               highDetailsTB.text = 'Section Information:\n' + hData;
              }
      
              function createSystemPanel() {
                var panel = new GUI.StackPanel();
+               panel.paddingLeft = 20;
+               panel.paddingBottom = 20;
+
                advancedTexture.addControl(panel);
                panel.verticalAlignment = 1;
  
                $.each(systemToBodyPartMapping, function(key: string, val){
-                 var button = createButton([key], key, "150px", "40px", "white", 20, "green", GUI.Control.HORIZONTAL_ALIGNMENT_LEFT)
+                 var button = createButton([key], key, "150px", "40px", "white", 10, "green", GUI.Control.HORIZONTAL_ALIGNMENT_LEFT)
                  panel.addControl(button);
                  button.onPointerUpObservable.add(function() {
                    setSystemHighlight(val);
@@ -664,6 +739,7 @@ const Model: React.FC = () => {
         <SplitPane split='vertical' defaultSize="70%" onResizerClick = {() => mainSceneEngine!.resize()}>
         <div ref={modelPaneRef} style={{ width:'100%', height: '100%'}}>
             { 
+                    !showLoading &&
                     <BabylonScene style={{ width:`{$modelContentDimensions.width}px`, height: `{$modelContentDimensions.height}px`}} 
                     width={modalContentDimensions.width}
                     height={modalContentDimensions.height}
