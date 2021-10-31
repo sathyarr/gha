@@ -101,6 +101,24 @@ function animateCamera (scene: any, position: any) {
     scene.beginAnimation(scene.activeCamera, 0, 100, true)
   }
 
+  function createLabel (mesh: any, advancedTexture: any, text: any) {
+    var label = new GUI.Rectangle('label for ' + mesh.name)
+    label.background = 'black'
+    label.height = '30px'
+    label.alpha = 0.5
+    label.width = '100px'
+    label.cornerRadius = 20
+    label.thickness = 1
+    label.linkOffsetY = 30
+    advancedTexture.addControl(label)
+    label.linkWithMesh(mesh)
+  
+    var text1 = new GUI.TextBlock()
+    text1.text = text
+    text1.color = 'white'
+    label.addControl(text1)
+  }
+
 let hl: any = null
 const render = true
 let rerender = true
@@ -111,14 +129,11 @@ let procedureContainer: any = null
 
 let uniqueKey = 0
 
-interface stateType {
-    data: string
- }
 
 const Model: React.FC = () => {
 
-  let location = useLocation<stateType>()
-//   console.log(location.state.data) 
+  let location = useLocation()
+  console.log(JSON.stringify(location.state)) 
   const [modalContentDimensions, setModalContentDimensions] = useState({ width:600, height:400})
   const modelPaneRef = useRef<any>(null)
   const [reactRender, setReactRender] = useState(false)
@@ -269,7 +284,7 @@ const Model: React.FC = () => {
                    });
                });
 
-            console.log(procedureListHtml)
+            // console.log(procedureListHtml)
 
              }
              createBodyPartPanel();

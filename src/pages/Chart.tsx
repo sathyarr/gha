@@ -8,7 +8,12 @@ import { home, newspaper, body, moon, menu } from 'ionicons/icons';
 //Added import statements
 import { Link, useHistory } from 'react-router-dom';
 
-const  endpoint  =  `http://10.0.1.15:2911/graph`;
+const  endpoint  =  `http://10.0.1.22:9000/parse`;
+
+const  demoEndpoint  =  `http://10.0.1.22:9000/synthetic`;
+
+let responseText = ""
+let doneLoading = false
 
 const Chart: React.FC = () => {
 
@@ -25,20 +30,40 @@ const Chart: React.FC = () => {
     // }, []);
     let history = useHistory();
 
-    function getGraph() {
+    async function getGraph() {
         const article = { title: 'Getting Knowledge Graph' };
-        axios.post(endpoint, charttext)
-            .then(response => console.log(response.data));
+        await axios.post(endpoint, charttext)
+            .then(response => {
+                responseText = JSON.stringify(response.data)
+                doneLoading = true
+                console.log(responseText);
+            })
         
-        history.push({
-            pathname: "/model",
-            state: { 'data' : '{ \
-                "Head": ["node12", "node8"], \
-                "Thigh": ["node14"], \
-                "Hand": ["node18"], \
-                "Spine": ["node6"] \
-              }'} 
-        });
+        if(doneLoading) {
+            doneLoading = false;
+            history.push({
+                pathname: "/model",
+                state: { 'data' : responseText} 
+            });
+      }
+    }
+
+    async function demoRun() {
+        const article = { title: 'Getting Knowledge Graph' };
+        await axios.post(demoEndpoint, charttext)
+            .then(response => {
+                responseText = JSON.stringify(response.data)
+                doneLoading = true
+                console.log(responseText);
+            })
+        
+        if(doneLoading) {
+            doneLoading = false;
+            history.push({
+                pathname: "/model",
+                state: { 'data' : responseText} 
+            });
+      }
     }
 
     const toggleDarkModeHandler = () => {
@@ -114,7 +139,15 @@ const Chart: React.FC = () => {
             // eslint-disable-next-line no-loop-func
             onClick={getGraph}
         >
-            <IonLabel>Process</IonLabel>
+            <IonLabel><h1>Process</h1></IonLabel>
+        </IonButton>
+        <IonLabel><div style={{ textAlign: "center"}}>OR</div></IonLabel>
+        <IonButton
+            expand='full'
+            // eslint-disable-next-line no-loop-func
+            onClick={demoRun}
+        >
+            <IonLabel><h1>Try Demo Data</h1></IonLabel>
         </IonButton>
     </IonContent>
         
