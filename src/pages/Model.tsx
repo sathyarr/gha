@@ -299,6 +299,7 @@ const Model: React.FC = () => {
                targetMesh.computeWorldMatrix();
                var matrix = targetMesh.getWorldMatrix();
                var global_position = BABYLON.Vector3.TransformCoordinates(targetMesh.getPositionExpressedInLocalSpace(), matrix);
+              //  targetMesh.position.x = 2;
                console.log(global_position);
              }
  

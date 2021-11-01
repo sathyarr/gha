@@ -8,9 +8,9 @@ import { home, newspaper, body, moon, menu } from 'ionicons/icons';
 //Added import statements
 import { Link, useHistory } from 'react-router-dom';
 
-const  endpoint  =  `http://localhost:9000/parse`;
+const  endpoint  =  `http://localhost:9001/parse`;
 
-const  demoEndpoint  =  `http://localhost:9000/synthetic`;
+const  demoEndpoint  =  `http://localhost:9001/synthetic`;
 
 let responseText = ""
 let doneLoading = false
@@ -34,7 +34,7 @@ const Chart: React.FC = () => {
       const article = { title: 'Getting Knowledge Graph' };
       await axios.post(endpoint, charttext)
           .then(response => {
-              responseText = JSON.stringify(response.data)
+              responseText = response.data
               doneLoading = true
               console.log(responseText);
           })
